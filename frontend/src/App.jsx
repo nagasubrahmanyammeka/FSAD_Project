@@ -5,6 +5,9 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LanguageSelector from "./components/LanguageSelector";
+import Schemes from "./pages/Schemes";
+import Devices from "./pages/Devices";
+import Technologies from "./pages/Technologies";
 
 // Components
 import UserProfile from "./components/UserProfile";
@@ -58,6 +61,9 @@ function App() {
               <Route path="/products" element={<Products />} />
               <Route path="/services" element={<Services />} />
               <Route path="/ph" element={<PhComment />} />
+              <Route path="/schemes" element={<Schemes />} />
+              <Route path="/devices" element={<Devices />} />
+              <Route path="/technologies" element={<Technologies />} />
 
               {/* Protected: User Profile */}
               <Route
