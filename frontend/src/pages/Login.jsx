@@ -76,14 +76,14 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-            Username:
+            Username:   (Sample test:12345)
           </label>
           <input
             name="name"         // Changed here
             type="text"         // Changed here
             value={formData.name}
             onChange={handleChange}
-            placeholder="Enter your username"  // Changed here
+            placeholder="Enter your username "  // Changed here
             required
             style={{
               width: '100%',
@@ -96,7 +96,7 @@ const Login = () => {
 
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-            Password:
+            Password:   (Sample test:12345)
           </label>
           <input
             name="password"
@@ -116,7 +116,7 @@ const Login = () => {
 
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500' }}>
-            Login As:
+            Login As:   (Sample test: Select any Role)
           </label>
           <div style={{
             display: 'grid',

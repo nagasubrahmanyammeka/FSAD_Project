@@ -11,10 +11,11 @@ const AdminDashboard = () => {
     experts: 0,
     publicUsers: 0
   });
+
   const [users, setUsers] = useState([]);
   const [deletingUserId, setDeletingUserId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchStatsAndUsers();
@@ -22,61 +23,102 @@ const AdminDashboard = () => {
 
   const fetchStatsAndUsers = async () => {
     try {
-      console.log('🔵 Fetching dashboard data...');
-      
       const statsRes = await axios.get("http://localhost:5000/api/admin/stats");
-      console.log('✅ Stats:', statsRes.data);
       setStats(statsRes.data);
-      
+
       const usersRes = await axios.get("http://localhost:5000/api/admin/users");
-      console.log('✅ Users:', usersRes.data);
       setUsers(usersRes.data);
-      
-      setLoading(false);
     } catch (err) {
-      console.error('❌ Dashboard error:', err);
-      setError('Failed to load dashboard data. Make sure backend is running.');
+      console.error("Backend not available. Loading demo users.");
+
+      const demoUsers = [
+        {
+          _id: "1",
+          name: "Ramesh",
+          username: "ramesh123",
+          email: "ramesh@gmail.com",
+          role: "farmer",
+          phone: "9876543210",
+          location: "Hyderabad"
+        },
+        {
+          _id: "2",
+          name: "Sita",
+          username: "sita456",
+          email: "sita@gmail.com",
+          role: "expert",
+          phone: "9123456780",
+          location: "Chennai"
+        },
+        {
+          _id: "3",
+          name: "Arjun",
+          username: "arjun789",
+          email: "arjun@gmail.com",
+          role: "public",
+          phone: "9012345678",
+          location: "Mumbai"
+        }
+      ];
+
+      setUsers(demoUsers);
+
+      setStats({
+        totalUsers: demoUsers.length,
+        farmers: demoUsers.filter(u => u.role === "farmer").length,
+        experts: demoUsers.filter(u => u.role === "expert").length,
+        publicUsers: demoUsers.filter(u => u.role === "public").length
+      });
+
+      setError("Backend not running. Showing demo data.");
+    } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Add User Navigation
+  const handleAddUser = () => {
+    navigate("/register");
+  };
+
+  // ✅ Update User Navigation
+  const handleUpdateUser = (userId) => {
+    navigate("/profile/update");
+  };
+
+  // ✅ Delete User
   const handleDelete = async (userId) => {
     const userToDelete = users.find(u => u._id === userId);
-    
+
     if (!window.confirm(
-      `Are you sure you want to delete user "${userToDelete?.name || 'this user'}"?\n\n` +
-      `Email: ${userToDelete?.email}\n` +
-      `Role: ${userToDelete?.role}\n\n` +
-      `This action cannot be undone!`
+      `Are you sure you want to delete "${userToDelete?.name}"?\n\nThis action cannot be undone.`
     )) {
       return;
     }
 
     setDeletingUserId(userId);
-    
+
     try {
       await axios.delete(`http://localhost:5000/api/admin/users/${userId}`);
-      setUsers(users.filter(user => user._id !== userId));
-      
+
+      const updatedUsers = users.filter(user => user._id !== userId);
+      setUsers(updatedUsers);
+
       const deletedUser = users.find(u => u._id === userId);
+
       if (deletedUser) {
         setStats(prev => ({
           totalUsers: prev.totalUsers - 1,
-          farmers: deletedUser.role === 'farmer' ? prev.farmers - 1 : prev.farmers,
-          experts: deletedUser.role === 'expert' ? prev.experts - 1 : prev.experts,
-          publicUsers: deletedUser.role === 'public' ? prev.publicUsers - 1 : prev.publicUsers,
+          farmers: deletedUser.role === "farmer" ? prev.farmers - 1 : prev.farmers,
+          experts: deletedUser.role === "expert" ? prev.experts - 1 : prev.experts,
+          publicUsers: deletedUser.role === "public" ? prev.publicUsers - 1 : prev.publicUsers
         }));
       }
 
-      alert(
-        `✅ User Deleted Successfully!\n\n` +
-        `Name: ${deletedUser?.name}\n` +
-        `Email: ${deletedUser?.email}\n` +
-        `Role: ${deletedUser?.role}`
-      );
+      alert("User deleted successfully!");
     } catch (error) {
-      console.error('❌ Delete error:', error);
-      alert(`❌ Failed to delete user!\n\nPlease try again.`);
+      console.error("Delete error:", error);
+      alert("Failed to delete user!");
     } finally {
       setDeletingUserId(null);
     }
@@ -85,7 +127,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-bg">
-        <div className="dashboard-card" style={{ textAlign: 'center', padding: '60px' }}>
+        <div className="dashboard-card" style={{ textAlign: "center", padding: "60px" }}>
           <h2>Loading dashboard...</h2>
         </div>
       </div>
@@ -95,37 +137,55 @@ const AdminDashboard = () => {
   return (
     <div className="dashboard-bg">
       <div className="dashboard-card">
-        <h1 style={{ marginBottom: "6px" }}>Admin Dashboard</h1>
-        <div style={{ color: "#d2ffd2", fontWeight: 400, marginBottom: "36px" }}>
+        <h1>Admin Dashboard</h1>
+        <p style={{ color: "#d2ffd2", marginBottom: "30px" }}>
           User Statistics Overview
-        </div>
+        </p>
 
         {error && (
-          <div className="alert alert-error">
-            ⚠️ {error}
+          <div style={{ color: "yellow", marginBottom: "20px" }}>
+            ⚠ {error}
           </div>
         )}
 
-        <div className="stats-grid" style={{ marginBottom: "34px" }}>
+        {/* ✅ Stats Section */}
+        <div className="stats-grid" style={{ marginBottom: "30px" }}>
           <div className="stat-card">
             <h3>Total Users</h3>
-            <div className="stat-number">{stats.totalUsers}</div>
+            <div>{stats.totalUsers}</div>
           </div>
           <div className="stat-card">
             <h3>Farmers</h3>
-            <div className="stat-number">{stats.farmers}</div>
+            <div>{stats.farmers}</div>
           </div>
           <div className="stat-card">
             <h3>Experts</h3>
-            <div className="stat-number">{stats.experts}</div>
+            <div>{stats.experts}</div>
           </div>
           <div className="stat-card">
             <h3>Public Users</h3>
-            <div className="stat-number">{stats.publicUsers}</div>
+            <div>{stats.publicUsers}</div>
           </div>
         </div>
 
-        <h2 style={{ margin: "22px 0 15px 0" }}>All Users</h2>
+        {/* ✅ Add User Button (Top) */}
+        <div style={{ marginBottom: "20px", textAlign: "right" }}>
+          <button
+            onClick={handleAddUser}
+            style={{
+              background: "#2ecc71",
+              color: "#fff",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            + Add User
+          </button>
+        </div>
+
+        {/* ✅ Users Table */}
         <div className="table-container">
           <table className="users-table">
             <thead>
@@ -142,39 +202,53 @@ const AdminDashboard = () => {
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="empty-state">
+                  <td colSpan="7" style={{ textAlign: "center" }}>
                     No users found.
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
+                users.map(user => (
                   <tr key={user._id}>
                     <td>{user.name}</td>
                     <td>{user.username}</td>
                     <td>{user.email}</td>
-                    <td>
-                      <span className={`status status--${user.role}`}>
-                        {user.role}
-                      </span>
-                    </td>
+                    <td>{user.role}</td>
                     <td>{user.phone}</td>
                     <td>{user.location}</td>
                     <td>
-                      <button
-                        style={{
-                          background: "#cf2323",
-                          color: "#ffffffff",
-                          border: "none",
-                          borderRadius: "4px",
-                          padding: "4px 14px",
-                          cursor: deletingUserId === user._id ? 'not-allowed' : 'pointer',
-                          opacity: deletingUserId === user._id ? 0.6 : 1
-                        }}
-                        onClick={() => handleDelete(user._id)}
-                        disabled={deletingUserId === user._id}
-                      >
-                        {deletingUserId === user._id ? "..." : "Delete"}
-                      </button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        {/* Update */}
+                        <button
+                          style={{
+                            background: "#3498db",
+                            color: "#fff",
+                            border: "none",
+                            padding: "4px 10px",
+                            borderRadius: "4px",
+                            cursor: "pointer"
+                          }}
+                          onClick={() => handleUpdateUser(user._id)}
+                        >
+                          Update
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          style={{
+                            background: "#cf2323",
+                            color: "#fff",
+                            border: "none",
+                            padding: "4px 10px",
+                            borderRadius: "4px",
+                            cursor: deletingUserId === user._id ? "not-allowed" : "pointer",
+                            opacity: deletingUserId === user._id ? 0.6 : 1
+                          }}
+                          onClick={() => handleDelete(user._id)}
+                          disabled={deletingUserId === user._id}
+                        >
+                          {deletingUserId === user._id ? "..." : "Delete"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -183,16 +257,24 @@ const AdminDashboard = () => {
           </table>
         </div>
 
-        <p style={{ marginTop: '30px', color: 'white' }}>
-          See the All Feedbacks Submitted by the Users - 
-          <button 
-            className="btn btn--sm"
-            style={{ marginTop: 20, marginLeft: 10 }}
+        {/* Feedback Navigation */}
+        <div style={{ marginTop: "30px" }}>
+          Click To See All Feedback Provided by the Users - 
+          <button
             onClick={() => navigate("/all-feedbacks")}
+            style={{
+              background: "#2b9c59",
+              color: "#fff",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
           >
-            See Feedbacks
+             See All Feedbacks
           </button>
-        </p>
+        </div>
+
       </div>
     </div>
   );

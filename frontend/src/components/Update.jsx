@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 export default function Update() {
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    location: ""
+    location: "",
+    email: ""
   });
 
   const [loading, setLoading] = useState(true);
@@ -27,10 +29,13 @@ export default function Update() {
           name: data.user.name || "",
           phone: data.user.phone || "",
           location: data.user.location || "",
+          email: data.user.email || ""
         });
+
       } catch (err) {
         console.error("Failed to load user:", err);
       }
+
       setLoading(false);
     };
 
@@ -84,6 +89,16 @@ export default function Update() {
         <input
           name="name"
           value={form.name}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+
+        <label style={styles.label}>Email</label>
+        <input
+          type="email"
+          name="email"
+          value={form.email}
           onChange={handleChange}
           style={styles.input}
           required

@@ -6,22 +6,56 @@ function AllFeedbacks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/feedback")
-      .then((res) => {
-        setFeedbacks(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError("Failed to fetch feedbacks");
-        setLoading(false);
-      });
-  }, []);
+ useEffect(() => {
+  axios
+    .get("http://localhost:5000/api/feedback")
+    .then((res) => {
+      setFeedbacks(res.data);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.log("Backend not available. Loading demo feedbacks.");
+
+      // ✅ Demo Feedbacks
+      const demoFeedbacks = [
+        {
+          _id: "1",
+          name: "Ramesh",
+          email: "ramesh@gmail.com",
+          message: "Very useful platform for farmers!"
+        },
+        {
+          _id: "2",
+          name: "Sita",
+          email: "sita@gmail.com",
+          message: "Experts are very helpful and responsive."
+        },
+        {
+          _id: "3",
+          name: "Arjun",
+          email: "arjun@gmail.com",
+          message: "Great agricultural guidance and support."
+        },
+        {
+          _id: "4",
+          name: "Lakshmi",
+          email: "lakshmi@gmail.com",
+          message: "I love the clean and simple dashboard design."
+        }
+      ];
+
+      setFeedbacks(demoFeedbacks);
+      setError("⚠️ Backend not running. Showing demo feedbacks.");
+      setLoading(false);
+    });
+}, []);
 
   if (loading) return <div>Loading feedbacks...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
-
+{error && (
+  <p style={{ color: "red", marginBottom: 10 }}>
+    {error}
+  </p>
+)}
   return (
     <div style={{ maxWidth: 600, margin: "40px auto", padding: 20 }}>
       <h2>All Feedbacks</h2>

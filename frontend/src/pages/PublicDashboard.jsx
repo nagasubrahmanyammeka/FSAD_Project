@@ -104,18 +104,25 @@ const PublicDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTechniques = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/farmer/techniques`);
-        setTechniques(res.data || []);
-      } catch (error) {
-        alert("Failed to load techniques");
-      } finally {
-        setLoading(false);
+  const fetchTechniques = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/techniques");
+
+      if (!response.ok) {
+        throw new Error("Network response not ok");
       }
-    };
-    fetchTechniques();
-  }, []);
+
+      const data = await response.json();
+      setTechniques(data);
+    } catch (error) {
+      console.error("Error loading techniques:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchTechniques();
+}, []);
 
   if (loading) return <div>Loading...</div>;
 
