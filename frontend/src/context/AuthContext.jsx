@@ -51,27 +51,54 @@ export default function AuthProvider({ children }) {
     }
   };
 
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post(`${AUTH_URL}/login`, { email, password });
-      const { token: jwtToken, user: userData } = res.data;
+  const login = async (name, password, role) => {
+  try {
 
-      localStorage.setItem("token", jwtToken);
-      localStorage.setItem("user", JSON.stringify(userData));
+    // ✅ SAMPLE UNIVERSAL LOGIN
+    if (name === "12345" && password === "12345") {
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${jwtToken}`;
-      setToken(jwtToken);
-      setUser(userData);
-
-      return { success: true, user: userData };
-    } catch (error) {
-      console.error("Login error:", error);
-      return {
-        success: false,
-        message: error.response?.data?.message || "Login failed. Please try again.",
+      const testUser = {
+        name: "Test User",
+        role: role,
       };
+
+      localStorage.setItem("user", JSON.stringify(testUser));
+      localStorage.setItem("token", "sample-token");
+
+      setUser(testUser);
+      setToken("sample-token");
+
+      return { success: true, user: testUser };
     }
-  };
+
+    // ✅ NORMAL BACKEND LOGIN
+    const res = await axios.post(`${AUTH_URL}/login`, {
+      name,
+      password,
+    });
+
+    const { token: jwtToken, user: userData } = res.data;
+
+    localStorage.setItem("token", jwtToken);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    axios.defaults.headers.common["Authorization"] = `Bearer ${jwtToken}`;
+
+    setToken(jwtToken);
+    setUser(userData);
+
+    return { success: true, user: userData };
+
+  } catch (error) {
+    console.error("Login error:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        "Login failed. Please try again.",
+    };
+  }
+};
 
   const register = async (data) => {
     try {

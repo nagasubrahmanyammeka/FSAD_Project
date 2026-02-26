@@ -1,36 +1,44 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 
 const AllContent = () => {
-  const [contents, setContents] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    axios.get("http://localhost:5000/api/content")
-      .then((res) => {
-        setContents(res.data);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div>Loading content...</div>;
+  const [content] = useState([
+    {
+      id: 1,
+      author: "Dr. Ramesh",
+      description: "Organic farming techniques PDF",
+      fileName: "organic-farming.pdf"
+    },
+    {
+      id: 2,
+      author: "Dr. Priya",
+      description: "Soil health improvement guide",
+      fileName: "soil-guide.docx"
+    }
+  ]);
 
   return (
-    <div style={{ maxWidth: 600, margin: "40px auto", padding: 20 }}>
+    <div style={{ maxWidth: 800, margin: "40px auto", padding: 20 }}>
       <h2>All Uploaded Content</h2>
-      {!contents.length && <p>No content yet!</p>}
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {contents.map(item => (
-          <li key={item._id} style={{
-            background: "#f8fafd", margin: "10px 0", borderRadius: 8, padding: "16px",
-            boxShadow: "0 2px 7px rgba(0,0,0,0.06)" }}>
-            <strong>{item.originalname}</strong> <br />
-            <span>Author: {item.author}</span> <br />
-            <span>Description: {item.description}</span> <br />
-            <a href={`http://localhost:5000/${item.filepath}`} download={item.originalname}>View</a>
-          </li>
-        ))}
-      </ul>
+
+      {content.length === 0 && <p>No content available.</p>}
+
+      {content.map((item) => (
+        <div
+          key={item.id}
+          style={{
+            background: "#f4f6fa",
+            padding: "15px",
+            margin: "15px 0",
+            borderRadius: 8,
+            boxShadow: "0 2px 7px rgba(0,0,0,0.06)"
+          }}
+        >
+          <p><strong>Author:</strong> {item.author}</p>
+          <p><strong>Description:</strong> {item.description}</p>
+          <p><strong>File:</strong> {item.fileName}</p>
+        </div>
+      ))}
     </div>
   );
 };

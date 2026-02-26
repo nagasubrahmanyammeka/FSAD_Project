@@ -1,31 +1,35 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 
 const AllGuidance = () => {
-  const [guidance, setGuidance] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/guidance")
-      .then((res) => {
-        setGuidance(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to fetch Guidance data");
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div>Loading Guidance...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  // 🔹 Static Guidance Data (No Backend)
+  const [guidance] = useState([
+    {
+      _id: 1,
+      name: "Dr. Ramesh",
+      email: "ramesh@agri.com",
+      message: "Use drip irrigation to save water and improve crop yield."
+    },
+    {
+      _id: 2,
+      name: "Dr. Priya",
+      email: "priya@agri.com",
+      message: "Apply organic compost to improve soil fertility."
+    },
+    {
+      _id: 3,
+      name: "Dr. Kumar",
+      email: "kumar@agri.com",
+      message: "Monitor pest attacks regularly and use bio-pesticides."
+    }
+  ]);
 
   return (
     <div style={{ maxWidth: 700, margin: "40px auto", padding: 20 }}>
       <h2>All Guidance Provided by Experts</h2>
-      {(!guidance || guidance.length === 0) && <p>No Guidance found!</p>}
+
+      {guidance.length === 0 && <p>No Guidance found!</p>}
+
       <ul style={{ listStyle: "none", padding: 0 }}>
         {guidance.map((item) => (
           <li
@@ -47,7 +51,7 @@ const AllGuidance = () => {
             <p>
               <strong>Message:</strong> {item.message}
             </p>
-            <br/>
+            <br />
             <p>Contact By: {item.email}</p>
           </li>
         ))}

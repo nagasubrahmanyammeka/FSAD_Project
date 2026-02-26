@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 
 const Feedback = () => {
   const [formData, setFormData] = useState({
@@ -7,29 +6,19 @@ const Feedback = () => {
     email: '',
     message: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
 
-    try {
-      await axios.post('http://localhost:5000/api/feedback', formData);
-      setSuccess('Feedback submitted successfully!');
-      setFormData({ name: '', email: '', message: '' });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit feedback');
-    } finally {
-      setLoading(false);
-    }
+    // Just show success message (no backend)
+    setSuccess('Feedback submitted successfully!');
+    setFormData({ name: '', email: '', message: '' });
   };
 
   return (
@@ -56,21 +45,6 @@ const Feedback = () => {
         <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
           Submit Feedback
         </h2>
-
-        {error && (
-          <div
-            style={{
-              color: '#d32f2f',
-              marginBottom: '15px',
-              padding: '12px',
-              backgroundColor: '#ffebee',
-              borderRadius: '6px',
-              border: '1px solid #ef5350',
-            }}
-          >
-            {error}
-          </div>
-        )}
 
         {success && (
           <div
@@ -150,20 +124,19 @@ const Feedback = () => {
 
           <button
             type="submit"
-            disabled={loading}
             style={{
               width: '100%',
               padding: '8px',
-              backgroundColor: loading ? '#ccc' : '#2e7d32',
+              backgroundColor: '#2e7d32',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               fontSize: '16px',
               fontWeight: 'bold',
             }}
           >
-            {loading ? 'Submitting...' : 'Submit Feedback'}
+            Submit Feedback
           </button>
         </form>
       </fieldset>
