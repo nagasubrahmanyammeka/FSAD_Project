@@ -20,30 +20,41 @@ const Register = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const result = await register(formData);
-    if (result.success) {
-      switch (formData.role) {
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'farmer':
-          navigate('/farmer');
-          break;
-        case 'expert':
-          navigate('/expert');
-          break;
-        case 'public':
-          navigate('/public');
-          break;
-        default:
-          navigate('/');
-      }
-    } else {
-      setError(result.message || 'Registration failed');
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    ...formData,
+    role: formData.role.toUpperCase(), // ✅ important
   };
+
+  const result = await register(payload);
+
+  if (result.success) {
+  const role = result.user.role; // ✅ from backend (ALREADY UPPERCASE)
+
+  console.log("Role:", role); // debug
+
+  switch (role) {
+    case "ADMIN":
+      navigate("/admin");
+      break;
+    case "FARMER":
+      navigate("/farmer");
+      break;
+    case "EXPERT":
+      navigate("/expert");
+      break;
+    case "PUBLIC":
+      navigate("/public");
+      break;
+    default:
+      navigate("/");
+  }
+} else {
+    setError(result.message || "Registration failed");
+  }
+};
 
   return (
     <div className="form-container" style={{ textAlign: 'left', maxWidth: '500px', margin: 'auto' }}>
@@ -182,15 +193,14 @@ const Register = () => {
               columnGap: '10px',
             }}
           >
-           {/*}
-            <input
+           <input
               type="radio"
               name="role"
               value="admin"
               checked={formData.role === 'admin'}
               onChange={handleChange}
             />
-            <label style={{ whiteSpace: 'nowrap' }}>Admin</label>*/}
+            <label style={{ whiteSpace: 'nowrap' }}>ADMIN</label>
             <input
               type="radio"
               name="role"

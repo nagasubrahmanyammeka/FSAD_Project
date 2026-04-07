@@ -31,16 +31,16 @@ const Login = () => {
       // Navigate based on role
       const userRole = result.user.role;
       switch (userRole) {
-        case 'admin':
+        case 'ADMIN':
           navigate('/admin');
           break;
-        case 'farmer':
+        case 'FARMER':
           navigate('/farmer');
           break;
-        case 'expert':
+        case 'EXPERT':
           navigate('/expert');
           break;
-        case 'public':
+        case 'PUBLIC':
           navigate('/public');
           break;
         default:
@@ -76,7 +76,7 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-            Username:   (Sample test:12345)
+            Username:   
           </label>
           <input
             name="name"         // Changed here
@@ -96,7 +96,7 @@ const Login = () => {
 
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-            Password:   (Sample test:12345)
+            Password:   
           </label>
           <input
             name="password"
@@ -116,7 +116,7 @@ const Login = () => {
 
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500' }}>
-            Login As:   (Sample test: Select any Role)
+            Login As:   
           </label>
           <div style={{
             display: 'grid',

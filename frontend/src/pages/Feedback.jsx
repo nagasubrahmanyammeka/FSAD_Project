@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { addFeedback } from '../api/api';   // ✅ import API
 
 const Feedback = () => {
   const [formData, setFormData] = useState({
@@ -8,18 +9,37 @@ const Feedback = () => {
   });
 
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Just show success message (no backend)
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const payload = {
+      name: formData.name,     // ✅ FIX
+      email: formData.email,   // ✅ FIX
+      message: formData.message
+    };
+
+    console.log("Sending feedback:", payload); // 🔍 DEBUG
+
+    await addFeedback(payload);
+
     setSuccess('Feedback submitted successfully!');
+    setError('');
     setFormData({ name: '', email: '', message: '' });
-  };
+
+  } catch (err) {
+    setError('Failed to submit feedback');
+    setSuccess('');
+  }
+};
 
   return (
     <div
@@ -46,79 +66,68 @@ const Feedback = () => {
           Submit Feedback
         </h2>
 
+        {/* ✅ Success Message */}
         {success && (
-          <div
-            style={{
-              color: '#2e7d32',
-              marginBottom: '15px',
-              padding: '12px',
-              backgroundColor: '#e8f5e9',
-              borderRadius: '6px',
-              border: '1px solid #4caf50',
-            }}
-          >
+          <div style={{
+            color: '#2e7d32',
+            marginBottom: '15px',
+            padding: '12px',
+            backgroundColor: '#e8f5e9',
+            borderRadius: '6px',
+            border: '1px solid #4caf50',
+          }}>
             {success}
+          </div>
+        )}
+
+        {/* ❌ Error Message */}
+        {error && (
+          <div style={{
+            color: '#d32f2f',
+            marginBottom: '15px',
+            padding: '12px',
+            backgroundColor: '#ffebee',
+            borderRadius: '6px',
+            border: '1px solid #f44336',
+          }}>
+            {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Name:
-            </label>
+            <label>Name:</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Enter your name"
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ccc',
-              }}
+              style={{ width: '100%', padding: '10px' }}
             />
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Email:
-            </label>
+            <label>Email:</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ccc',
-              }}
+              style={{ width: '100%', padding: '10px' }}
             />
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Message:
-            </label>
+            <label>Message:</label>
             <textarea
               name="message"
               value={formData.message}
               onChange={handleChange}
-              placeholder="Enter your feedback message"
               required
               rows="5"
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ccc',
-              }}
+              style={{ width: '100%', padding: '10px' }}
             />
           </div>
 
@@ -126,13 +135,12 @@ const Feedback = () => {
             type="submit"
             style={{
               width: '100%',
-              padding: '8px',
+              padding: '10px',
               backgroundColor: '#2e7d32',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: '16px',
               fontWeight: 'bold',
             }}
           >

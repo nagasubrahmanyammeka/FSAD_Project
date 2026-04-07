@@ -2,164 +2,85 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
+const defaultAvatar =
+  "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
 
 export default function UserProfile() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+
   const [details, setDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
-  // -----------------------------
-  // Fetch user details
-  // -----------------------------
+  // =========================
+  // LOAD USER
+  // =========================
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (authLoading) return;
+    if (loading) return;
 
-      if (!user) {
-        setError("User not logged in. Redirecting to login...");
-        setLoading(false);
-        setTimeout(() => navigate("/login"), 1500);
-        return;
-      }
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("No authentication token found. Please login again.");
-          setLoading(false);
-          setTimeout(() => {
-            logout();
-            navigate("/login");
-          }, 1500);
-          return;
-        }
+    setDetails(user);
+  }, [user, loading, navigate]);
 
-        const response = await fetch("http://localhost:5000/api/auth/me", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.status === 401) {
-          setError("Session expired. Please login again.");
-          setLoading(false);
-          setTimeout(() => {
-            logout();
-            navigate("/login");
-          }, 1500);
-          return;
-        }
-
-        if (!response.ok) throw new Error("Failed to fetch profile.");
-
-        const data = await response.json();
-        setDetails(data.user);
-        setError("");
-      } catch (err) {
-  console.log("Backend not available. Showing test user profile.");
-
-  const roles = ["farmer", "public", "expert", "admin"];
-
-  setDetails({
-    _id: "test12345",
-    name: "Demo User",
-    email: "demo@example.com",
-    phone: "9876543210",
-    location: "Hyderabad",
-    role: roles[Math.floor(Math.random() * roles.length)],
-    profileImage: "",
-  });
-
-  setError(""); // Clear error so UI doesn't show error screen
-}finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserDetails();
-  }, [user, authLoading, navigate, logout]);
-
-  // -----------------------------
-  // DELETE ACCOUNT FUNCTION
-  // -----------------------------
+  // =========================
+  // DELETE ACCOUNT
+  // =========================
   const handleDeleteAccount = async () => {
-    if (!details?._id) return;
+    if (!details?.id) return;
 
     if (
       !window.confirm(
-        `⚠️ Are you sure you want to delete your account?\n\n` +
-          `Name: ${details.name}\n` +
-          `Email: ${details.email}\n` +
-          `Role: ${details.role}\n\n` +
-          `This action CANNOT be undone!`
+        `⚠️ Delete account?\n\nName: ${details.name}\nEmail: ${details.email}\nRole: ${details.role}`
       )
-    ) {
+    )
       return;
-    }
 
     setDeleting(true);
 
     try {
-      const token = localStorage.getItem("token");
+      await fetch(`http://localhost:2026/api/admin/users/${details.id}`, {
+        method: "DELETE",
+      });
 
-      const res = await fetch(
-        `http://localhost:5000/api/admin/users/${details._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to delete account");
-      }
-
-      alert("✅ Account deleted successfully.");
+      alert("✅ Account deleted successfully");
       logout();
       navigate("/register");
     } catch (err) {
       console.error(err);
-      alert("❌ Unable to delete account. Try again later.");
+      alert("❌ Delete failed");
     } finally {
       setDeleting(false);
     }
   };
 
-  if (loading || authLoading) {
+  // =========================
+  // DASHBOARD NAVIGATION
+  // =========================
+  const handleDashboard = () => {
+    switch (details.role) {
+      case "ADMIN":
+        navigate("/admin");
+        break;
+      case "FARMER":
+        navigate("/farmer");
+        break;
+      case "EXPERT":
+        navigate("/expert");
+        break;
+      case "PUBLIC":
+        navigate("/public");
+        break;
+      default:
+        navigate("/");
+    }
+  };
+
+  if (loading || !details) {
     return <div style={styles.loading}>Loading profile...</div>;
-  }
-
-  if (error) {
-    return (
-      <div style={styles.error}>
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button onClick={() => navigate("/login")} style={styles.retryBtn}>
-          Go to Login
-        </button>
-      </div>
-    );
-  }
-
-  if (!details) return null;
-
-  const { name = "", email = "", phone = "", location = "", role = "" } = details;
-
-  function handleDashboard() {
-    const roleClean = role.trim().toLowerCase();
-    if (roleClean === "farmer") navigate("/farmer");
-    else if (roleClean === "public") navigate("/public");
-    else if (roleClean === "admin") navigate("/admin");
-    else if (roleClean === "expert") navigate("/expert");
-    else navigate("/");
   }
 
   return (
@@ -167,67 +88,62 @@ export default function UserProfile() {
       <div style={styles.card}>
         <div style={styles.profileHeading}>Profile</div>
 
+        {/* Avatar */}
         <div style={{ textAlign: "center", margin: "26px 0 18px 0" }}>
-          <img
-            src={details.profileImage || defaultAvatar}
-            alt="User Avatar"
-            style={styles.avatar}
-          />
-          <div style={styles.name}>{name}</div>
-          <div style={styles.role}>
-            {role ? role.charAt(0).toUpperCase() + role.slice(1) : ""}
-          </div>
+          <img src={defaultAvatar} alt="avatar" style={styles.avatar} />
+          <div style={styles.name}>{details.name}</div>
+          <div style={styles.role}>{details.role}</div>
         </div>
 
+        {/* Details */}
         <div style={styles.fieldGroup}>
           <div style={styles.inputRow}>
             <label style={styles.inputLabel}>Full Name</label>
-            <input disabled style={styles.input} value={name} />
+            <input disabled style={styles.input} value={details.name} />
           </div>
 
           <div style={styles.inputRow}>
             <label style={styles.inputLabel}>Email</label>
-            <input disabled style={styles.input} value={email} />
+            <input disabled style={styles.input} value={details.email} />
           </div>
 
           <div style={styles.inputRow}>
             <label style={styles.inputLabel}>Phone</label>
-            <input disabled style={styles.input} value={phone} />
+            <input disabled style={styles.input} value={details.phone || ""} />
           </div>
 
           <div style={styles.inputRow}>
             <label style={styles.inputLabel}>Location</label>
-            <input disabled style={styles.input} value={location} />
+            <input disabled style={styles.input} value={details.location || ""} />
           </div>
 
           <div style={styles.inputRow}>
             <label style={styles.inputLabel}>Role</label>
-            <input
-              disabled
-              style={styles.input}
-              value={role ? role.charAt(0).toUpperCase() + role.slice(1) : ""}
-            />
+            <input disabled style={styles.input} value={details.role} />
           </div>
         </div>
 
-        {/* update button */}
-        <button onClick={() => navigate("/profile/update")} style={styles.updateBtn}>
+        {/* UPDATE */}
+        <button
+          onClick={() => navigate("/profile/update")}
+          style={styles.updateBtn}
+        >
           Update Profile
         </button>
 
-        {/* delete button */}
+        {/* DELETE */}
         <button
           onClick={handleDeleteAccount}
           disabled={deleting}
           style={{
             ...styles.deleteBtn,
             opacity: deleting ? 0.6 : 1,
-            cursor: deleting ? "not-allowed" : "pointer",
           }}
         >
           {deleting ? "Deleting..." : "Delete Account"}
         </button>
 
+        {/* DASHBOARD */}
         <button style={styles.dashboardBtn} onClick={handleDashboard}>
           Go To Dashboard
         </button>
@@ -236,9 +152,11 @@ export default function UserProfile() {
   );
 }
 
-// -----------------------------
-// STYLES
-// -----------------------------
+//
+// =========================
+// STYLES (YOUR ORIGINAL)
+// =========================
+//
 const styles = {
   pageWrapper: {
     minHeight: "calc(100vh - 80px)",
@@ -291,18 +209,14 @@ const styles = {
   },
   inputLabel: {
     width: "120px",
-    minWidth: "120px",
     fontWeight: "500",
-    color: "#153518",
   },
   input: {
     flex: 1,
-    fontSize: "1.04rem",
-    padding: "10px 12px",
+    padding: "10px",
     borderRadius: "7px",
-    border: "1px solid #eaeaea",
+    border: "1px solid #ddd",
     background: "#f6f6f6",
-    color: "#55786e",
   },
   updateBtn: {
     marginTop: "20px",
@@ -311,7 +225,6 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "8px",
-    fontSize: "1rem",
     cursor: "pointer",
   },
   deleteBtn: {
@@ -321,7 +234,6 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "8px",
-    fontSize: "1rem",
     cursor: "pointer",
   },
   dashboardBtn: {
@@ -334,13 +246,8 @@ const styles = {
     borderRadius: "8px",
     cursor: "pointer",
   },
-  loading: { textAlign: "center", padding: "40px", fontSize: "1.2rem" },
-  error: { color: "red", textAlign: "center", padding: "40px" },
-  retryBtn: {
-    marginTop: "20px",
-    padding: "10px 20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    borderRadius: "5px",
+  loading: {
+    textAlign: "center",
+    padding: "40px",
   },
 };

@@ -1,14 +1,32 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: "http://localhost:5000/api" });
+const API = "http://localhost:2026/api";
 
-export const registerUser = (data) => API.post("/auth/register", data);
-export const loginUser = (data) => API.post("/auth/login", data);
-export const getUsers = (token) =>
-  API.get("/users", { headers: { Authorization: `Bearer ${token}` } });
-export const deleteUser = (id, token) =>
-  API.delete(`/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+// AUTH
+export const registerUser = (data) => axios.post(`${API}/auth/register`, data);
+export const loginUser = (data) => axios.post(`${API}/auth/login`, data);
 
-// ✅ Added this export
-export const getProducts = (token) =>
-  API.get("/products", { headers: { Authorization: `Bearer ${token}` } });
+// PRODUCTS
+export const getProducts = () => axios.get(`${API}/products`);
+export const addProduct = (data) => axios.post(`${API}/products`, data);
+
+// SCHEMES
+export const getSchemes = () => axios.get(`${API}/schemes`);
+export const addScheme = (data) => axios.post(`${API}/schemes`, data);
+
+// FEEDBACK
+export const getFeedback = () => axios.get(`${API}/feedback`);
+export const addFeedback = (data) => axios.post(`${API}/feedback`, data);
+
+// GUIDANCE
+export const addGuidance = (data) => axios.post(`${API}/guidance`, data);
+export const getGuidance = () => axios.get(`${API}/guidance`);
+
+// CONTENT
+export const addContent = (data) =>
+  axios.post(`${API}/content/upload`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+export const getContent = () => axios.get(`${API}/content`);                

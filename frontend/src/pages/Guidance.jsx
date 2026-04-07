@@ -18,29 +18,33 @@ const Guidance = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
+  e.preventDefault();
 
-    try {
-      console.log('🔵 Submitting guidance request:', formData);
+  setLoading(true);
+  setError("");
+  setSuccess("");
 
-      const response = await axios.post('http://localhost:5000/api/guidance', formData);
+  try {
+    const res = await axios.post(
+      "http://localhost:2026/api/guidance",
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
-      console.log(' Guidance submitted:', response.data);
+    setSuccess("Guidance submitted successfully!");
+    setFormData({ name: "", email: "", message: "" });
 
-      setSuccess('Guidance request submitted successfully!');
-      setFormData({ name: '', email: '', message: '' });
-
-      
-    } catch (err) {
-      console.error('❌ Guidance error:', err);
-      setError(err.response?.data?.message || 'Failed to submit guidance request');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error("ERROR:", err.response || err);
+    setError(err.response?.data || "Submission failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     

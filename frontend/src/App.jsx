@@ -98,7 +98,7 @@ function App() {
               <Route
                 path="/create-content"
                 element={
-                  <ProtectedRoute allowedRoles={["admin", "expert"]}>
+                  <ProtectedRoute allowedRoles={[ "EXPERT" ]}>
                     <CreateContent />
                   </ProtectedRoute>
                 }
@@ -114,13 +114,13 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/all-feedbacks" element={<AllFeedbacks />} />
+              <Route path="/admin/feedbacks" element={<AllFeedbacks />} />
 
               {/* Dashboards */}
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute allowedRoles={["ADMIN"]}>
                     <AdminDashboard />
                   </ProtectedRoute>
                 }
@@ -128,7 +128,7 @@ function App() {
               <Route
                 path="/farmer"
                 element={
-                  <ProtectedRoute allowedRoles={["farmer"]}>
+                  <ProtectedRoute allowedRoles={["FARMER"]}>
                     <FarmerDashboard />
                   </ProtectedRoute>
                 }
@@ -136,7 +136,7 @@ function App() {
               <Route
                 path="/public"
                 element={
-                  <ProtectedRoute allowedRoles={["public"]}>
+                  <ProtectedRoute allowedRoles={["PUBLIC"]}>
                     <PublicDashboard />
                   </ProtectedRoute>
                 }
@@ -144,7 +144,7 @@ function App() {
               <Route
                 path="/expert"
                 element={
-                  <ProtectedRoute allowedRoles={["expert"]}>
+                  <ProtectedRoute allowedRoles={["EXPERT"]}>
                     <ExpertDashboard />
                   </ProtectedRoute>
                 }

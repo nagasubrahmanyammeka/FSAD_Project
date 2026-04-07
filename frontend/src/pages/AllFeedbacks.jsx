@@ -1,85 +1,50 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-function AllFeedbacks() {
+const AllFeedback = () => {
   const [feedbacks, setFeedbacks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
- useEffect(() => {
-  axios
-    .get("http://localhost:5000/api/feedback")
-    .then((res) => {
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const res = await axios.get("http://localhost:2026/api/feedback");
       setFeedbacks(res.data);
-      setLoading(false);
-    })
-    .catch((err) => {
-      console.log("Backend not available. Loading demo feedbacks.");
+    } catch (err) {
+      console.error("Error fetching feedbacks:", err);
+    }
+  };
 
-      // ✅ Demo Feedbacks
-      const demoFeedbacks = [
-        {
-          _id: "1",
-          name: "Ramesh",
-          email: "ramesh@gmail.com",
-          message: "Very useful platform for farmers!"
-        },
-        {
-          _id: "2",
-          name: "Sita",
-          email: "sita@gmail.com",
-          message: "Experts are very helpful and responsive."
-        },
-        {
-          _id: "3",
-          name: "Arjun",
-          email: "arjun@gmail.com",
-          message: "Great agricultural guidance and support."
-        },
-        {
-          _id: "4",
-          name: "Lakshmi",
-          email: "lakshmi@gmail.com",
-          message: "I love the clean and simple dashboard design."
-        }
-      ];
-
-      setFeedbacks(demoFeedbacks);
-      setError("⚠️ Backend not running. Showing demo feedbacks.");
-      setLoading(false);
-    });
-}, []);
-
-  if (loading) return <div>Loading feedbacks...</div>;
-{error && (
-  <p style={{ color: "red", marginBottom: 10 }}>
-    {error}
-  </p>
-)}
   return (
-    <div style={{ maxWidth: 600, margin: "40px auto", padding: 20 }}>
+    <div style={{ maxWidth: "800px", margin: "40px auto" }}>
       <h2>All Feedbacks</h2>
-      {(!feedbacks || feedbacks.length === 0) && <p>No feedbacks found!</p>}
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {feedbacks.map((fb) => (
-          <li
-            key={fb._id}
-            style={{
-              background: "#f4f6fa",
-              margin: "10px 0",
-              borderRadius: 8,
-              padding: "16px",
-              boxShadow: "0 2px 7px rgba(0,0,0,0.06)",
-            }}
-          >
-            <span><strong>Name:</strong> {fb.name}</span> <br />
-            <span><strong>Email ID: </strong>{fb.email}</span> <br />
-            <span><strong>Comment: </strong>{fb.message}</span>
-          </li>
-        ))}
-      </ul>
+
+      {feedbacks.length === 0 ? (
+        <p>No feedback found</p>
+      ) : (
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {feedbacks.map((f) => (
+            <li
+              key={f.id}
+              style={{
+                background: "#f9fafc",
+                margin: "10px 0",
+                padding: "15px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+              }}
+            >
+              <p><strong>Name:</strong> {f.name}</p>
+              <p><strong>Email:</strong> {f.email}</p>
+              <p><strong>Message:</strong> {f.message}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
+};
 
-export default AllFeedbacks;
+export default AllFeedback;

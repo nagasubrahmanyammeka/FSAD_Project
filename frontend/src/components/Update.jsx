@@ -1,80 +1,57 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const API = "http://localhost:2026/api/admin";
 
 export default function Update() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [form, setForm] = useState({
+    id: null,
     name: "",
+    username: "",
+    email: "",
+    role: "FARMER",
     phone: "",
-    location: "",
-    email: ""
+    location: ""
   });
 
   const [loading, setLoading] = useState(true);
 
-  // Load current user details
+  // ✅ SAME AS ADMIN EDIT
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch("http://localhost:5000/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const data = await res.json();
-
-        setForm({
-          name: data.user.name || "",
-          phone: data.user.phone || "",
-          location: data.user.location || "",
-          email: data.user.email || ""
-        });
-
-      } catch (err) {
-        console.error("Failed to load user:", err);
-      }
-
+    if (location.state) {
+      setForm(location.state); // 🔥 EXACT SAME OBJECT
       setLoading(false);
-    };
+    } else {
+      alert("No user data found!");
+      navigate("/admin");
+    }
+  }, [location, navigate]);
 
-    loadUser();
-  }, []);
-
-  // Handle input typing
+  // INPUT
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Submit update request
+  // ✅ SAME UPDATE LOGIC
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("http://localhost:5000/api/users/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(form),
+      await axios.put(`${API}/users/${form.id}`, {
+        ...form,
+        role: form.role.toUpperCase()
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Update failed!");
-        return;
-      }
-
-      alert("Profile updated successfully!");
-      navigate("/profile");
+      alert("✅ Updated successfully!");
+      navigate("/admin");
 
     } catch (err) {
-      alert("Error updating profile: " + err.message);
+      console.error(err);
+      alert("❌ Update failed");
     }
   };
 
@@ -82,55 +59,24 @@ export default function Update() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Update Profile</h2>
+      <h2 style={styles.title}>Update User</h2>
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        <label style={styles.label}>Full Name</label>
-        <input
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        />
+        <input name="name" value={form.name} onChange={handleChange} style={styles.input} placeholder="Name" />
+        <input name="username" value={form.username} onChange={handleChange} style={styles.input} placeholder="Username" />
+        <input name="email" value={form.email} onChange={handleChange} style={styles.input} placeholder="Email" />
+        <input name="phone" value={form.phone} onChange={handleChange} style={styles.input} placeholder="Phone" />
+        <input name="location" value={form.location} onChange={handleChange} style={styles.input} placeholder="Location" />
 
-        <label style={styles.label}>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        />
+        <select name="role" value={form.role} onChange={handleChange} style={styles.input}>
+          <option value="FARMER">Farmer</option>
+          <option value="EXPERT">Expert</option>
+          <option value="PUBLIC">Public</option>
+          <option value="ADMIN">Admin</option>
+        </select>
 
-        <label style={styles.label}>Phone</label>
-        <input
-          name="phone"
-          value={form.phone}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        />
-
-        <label style={styles.label}>Location</label>
-        <input
-          name="location"
-          value={form.location}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        />
-
-        <button type="submit" style={styles.updateBtn}>
-          Save Changes
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigate("/profile")}
-          style={styles.cancelBtn}
-        >
+        <button type="submit" style={styles.updateBtn}>Update</button>
+        <button type="button" onClick={() => navigate("/admin")} style={styles.cancelBtn}>
           Cancel
         </button>
       </form>
@@ -140,7 +86,7 @@ export default function Update() {
 
 const styles = {
   container: {
-    maxWidth: "450px",
+    maxWidth: "500px",
     margin: "40px auto",
     padding: "25px",
     borderRadius: "12px",
@@ -148,8 +94,6 @@ const styles = {
     background: "#fff",
   },
   title: {
-    fontSize: "1.5rem",
-    fontWeight: "bold",
     textAlign: "center",
     marginBottom: "20px",
     color: "#226147",
@@ -157,36 +101,25 @@ const styles = {
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
-  },
-  label: {
-    fontWeight: "500",
-    color: "#153518",
+    gap: "12px",
   },
   input: {
     padding: "10px",
-    fontSize: "1rem",
     borderRadius: "6px",
     border: "1px solid #ccc",
-    background: "#f8f8f8",
   },
   updateBtn: {
-    padding: "12px",
-    background: "#27a844",
-    color: "white",
+    background: "#3498db",
+    color: "#fff",
+    padding: "10px",
     border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "bold",
+    borderRadius: "6px",
   },
   cancelBtn: {
-    padding: "10px",
     background: "#aaa",
-    color: "white",
+    color: "#fff",
+    padding: "10px",
     border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    marginTop: "5px",
+    borderRadius: "6px",
   },
 };

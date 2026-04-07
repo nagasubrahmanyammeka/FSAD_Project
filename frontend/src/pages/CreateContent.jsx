@@ -1,145 +1,161 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const CreateContent = () => {
-  const [file, setFile] = useState(null);
-  const [description, setDescription] = useState("");
-  const [author, setAuthor] = useState("");
-  const navigate = useNavigate();
+export default function CreateContent() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    title: "",
+    description: "",
+    file: null,
+  });
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    if (e.target.name === "file") {
+      setForm({ ...form, file: e.target.files[0] });
+    } else {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!file) {
-      alert("Choose a file first!");
+    if (!form.file) {
+      alert("Please select a file");
       return;
     }
 
-    // 🔹 Just simulate upload (no backend)
-    const contentData = {
-      fileName: file.name,
-      description,
-      author,
-    };
+    try {
+      setLoading(true);
 
-    console.log("Uploaded Content:", contentData);
+      const data = new FormData();
+      data.append("name", form.name);
+      data.append("email", form.email);
+      data.append("title", form.title);
+      data.append("description", form.description);
+      data.append("file", form.file);
 
-    alert("Content uploaded successfully! (Frontend only)");
+      const res = await axios.post(
+        "http://localhost:2026/api/content/upload",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    // Optional: clear form
-    setFile(null);
-    setDescription("");
-    setAuthor("");
+      console.log("Uploaded:", res.data);
+      alert("✅ Content uploaded successfully!");
 
-    // Navigate to content page
-    navigate("/all-content");
+      // Reset form
+      setForm({
+        name: "",
+        email: "",
+        title: "",
+        description: "",
+        file: null,
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("❌ Upload failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div
-      className="page-container"
-      style={{
-        maxWidth: 600,
-        margin: "40px auto",
-        padding: 20,
-        background: "#f4f6fa",
-        borderRadius: 8,
-        boxShadow: "0 2px 7px rgba(0,0,0,0.06)",
-      }}
-    >
-      <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        Upload Content (PDF, DOCX, MP4, etc.)
-      </h2>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Create Content</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-        <label
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            fontWeight: "bold",
-          }}
-        >
-          Author:
-          <input
-            type="text"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            required
-            style={{
-              padding: "10px",
-              borderRadius: 6,
-              border: "1px solid #ddd",
-            }}
-          />
-        </label>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          name="name"
+          placeholder="Your Name"
+          value={form.name}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
 
-        <label
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            fontWeight: "bold",
-          }}
-        >
-          Short Description:
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            rows={3}
-            style={{
-              padding: "10px",
-              borderRadius: 6,
-              border: "1px solid #ddd",
-            }}
-          />
-        </label>
+        <input
+          name="email"
+          placeholder="Your Email"
+          value={form.email}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
 
-        <label
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            fontWeight: "bold",
-          }}
-        >
-          File:
-          <input
-            type="file"
-            onChange={handleFileChange}
-            required
-            accept=".pdf,.docx,.txt,.mp4,.doc"
-            style={{ marginTop: 8 }}
-          />
-        </label>
+        <input
+          name="title"
+          placeholder="Title"
+          value={form.title}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
 
-        <button
-          type="submit"
-          style={{
-            padding: "10px 24px",
-            borderRadius: 6,
-            border: "none",
-            backgroundColor: "#2a9d8f",
-            color: "white",
-            fontWeight: "bold",
-            cursor: "pointer",
-            alignSelf: "center",
-          }}
-        >
-          Upload
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+
+        <input
+          type="file"
+          name="file"
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+
+        <button type="submit" style={styles.button} disabled={loading}>
+          {loading ? "Uploading..." : "Upload Content"}
         </button>
       </form>
     </div>
   );
-};
+}
 
-export default CreateContent;
+const styles = {
+  container: {
+    maxWidth: "500px",
+    margin: "40px auto",
+    padding: "25px",
+    background: "#fff",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: "20px",
+    color: "#226147",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+  input: {
+    padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+  },
+  button: {
+    padding: "12px",
+    background: "#27a844",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+};
